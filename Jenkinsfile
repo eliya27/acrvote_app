@@ -27,7 +27,7 @@ pipeline {
                            script{
                                 kubernetesDeploy(
                                              configs: 'azure-vote-all-in-one-redis.yaml',
-                                             kubeconfigid: 'K8S',
+                                             kubeconfigId: 'K8S',
                                              enableConfigSubstitution: false
                           )
                    }
