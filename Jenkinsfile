@@ -1,44 +1,26 @@
-node {
-    def app
-	
+pipeline {
+    agent any
 
-    stage('Clone repository') {
-        /* Cloning the Repository to our Workspace */
-	 echo "Start Cloning repository"   
-
-        checkout scm
-	    
-	 echo "Finish Cloning repository"   
+    environment {
+        AZURE_SUBSCRIPTION_ID='b2c50cc7-e835-4e58-a990-d2c564a07420'
+        AZURE_TENANT_ID='89dc1d2c-a8dd-4803-b8ef-1c8963b09b20'
+        CONTAINER_REGISTRY='eliyareg2'
+        RESOURCE_GROUP='AKSRG'
+        REPO="https://azure_vote_jenkins"
+        IMAGE_NAME="azure_vote_app"
+        TAG="latest"
     }
 
-    stage('Build image') {
-	    echo "Trying to Build Docker Image"
-        /* This builds the actual image */
-        app = docker.build("eliyagervas/azure-app-jenkins")
-	    echo "Finish Build Docker Image"
+    stages {
+        stage('container registry') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'myAzureCredential', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
+                            sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
+                            sh 'az account set -s $AZURE_SUBSCRIPTION_ID'
+                            sh 'az acr login --name $CONTAINER_REGISTRY --resource-group $RESOURCE_GROUP'
+                            sh 'az acr build --image $REPO/$IMAGE_NAME:$TAG --registry $CONTAINER_REGISTRY --file Dockerfile . '
+                        }
+            }
+        }
     }
-		   
-    stage('Push image') {
-	      echo "Trying Push Docker Build to DockerHub"
-        /* You would need to first register with DockerHub before you can push images to your account */
-        docker.withRegistry('https://registry.hub.docker.com', 'Dockerhub-ID') {
-            app.push("${env.BUILD_NUMBER}")
-            app.push("latest")
-            } 
-                echo "Finish Push Docker Build to DockerHub"
-    }
-    
-     stage('Deployment') {
-	      echo "Trying to Deploy"
-          acsDeploy(azureCredentialsId: "jenkins_demo", 
-		    configFilePaths: "**/*.yaml", 
-		    containerService: "jenkinsaks | AKS", 
-		    dcosDockerCredentialsPath: "", 
-		    resourceGroupName: "jenkins-app", 
-		    secretName: "", 
-		    sshCredentialsId: ""
-		    ) 
-                echo "Finish Deployment"
-    }	
-	
 }
