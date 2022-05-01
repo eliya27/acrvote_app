@@ -22,5 +22,17 @@ pipeline {
                         }
             }
         }
+       stage('deployment'){
+             steps {
+                           script{
+                                kubernetesDeployment(
+                                             configs: 'azure-vote-all-in-one-redis.yaml',
+                                             kubeconfigid: 'K8S',
+                                             enableConfigSubstitution: false
+                          )
+                   }
+              }
+       }
+   
     }
 }
