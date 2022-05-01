@@ -4,9 +4,9 @@ pipeline {
     environment {
         AZURE_SUBSCRIPTION_ID='b2c50cc7-e835-4e58-a990-d2c564a07420'
         AZURE_TENANT_ID='89dc1d2c-a8dd-4803-b8ef-1c8963b09b20'
-        CONTAINER_REGISTRY='eliyareg2.azurecr.io'
+        CONTAINER_REGISTRY='eliyareg2'
         RESOURCE_GROUP='AKSRG'
-        REPO="https://azure_vote_jenkins"
+        REPO="azure_vote_jenkins"
         IMAGE_NAME="azure_vote_app"
         TAG="latest"
     }
