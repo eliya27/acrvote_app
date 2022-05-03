@@ -13,46 +13,51 @@ pipeline {
 
     stages {
         stage('Login to Azure account') {
-                             echo "Login to Azure cloud"
+                            
             
             steps {
+                               echo "Login to Azure cloud"
                 withCredentials([usernamePassword(credentialsId: 'acr_sp2', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
                             sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
                             sh 'az account set -s $AZURE_SUBSCRIPTION_ID'
+                               echo "Finish Login to Azure cloud"
                             
                         }
-                             echo "Finish Login to Azure cloud"
+                             
             }
         }
         
         stage('Login to container registry') {
                              
-                             echo "Login to Container registry"
+                             
             steps {
+                             echo "Login to Container registry"
                 withCredentials([usernamePassword(credentialsId: 'acr_sp2', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
                             
                             sh 'az acr login --name $CONTAINER_REGISTRY --resource-group $RESOURCE_GROUP'
-                           
+                             echo "Finish Login to Container registry"
                         }
-                              echo "Finish Login to Container registry"
+                              
             }
         }
         
         stage('Build Image') {
-                               echo "Start Image building"
+                               
             steps {
+                              echo "Start Image building"
                 withCredentials([usernamePassword(credentialsId: 'acr_sp2', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
                             
                             sh 'az acr build --image $REPO/$IMAGE_NAME:$TAG --registry $CONTAINER_REGISTRY --resource-group AKSRG --file Dockerfile .' 
-                    
+                              echo "Finish Image building"
                         }
             }
-                               echo "Finish Image building"
+                               
         }
         
        stage('Container Deployment'){
-                              echo "Start kubernetes deployment"
+                              
              steps {
+                              echo "Start kubernetes deployment"
                            script{
                                 kubernetesDeploy(
                                              configs: 'azure-vote-all-in-one-redis.yaml',
@@ -60,8 +65,8 @@ pipeline {
                                              enableConfigSubstitution: false
                           )
                    }
+                              echo "Finish kubernetes deployment"
               }
-                               echo "Finish kubernetes deployment"
        }
    
     }
