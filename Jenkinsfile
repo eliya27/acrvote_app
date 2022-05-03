@@ -13,26 +13,33 @@ pipeline {
 
     stages {
         stage('Login to Azure account') {
+                             echo "Login to Azure cloud"
+            
             steps {
                 withCredentials([usernamePassword(credentialsId: 'acr_sp2', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
                             sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID'
                             sh 'az account set -s $AZURE_SUBSCRIPTION_ID'
                             
                         }
+                             echo "Finish Login to Azure cloud"
             }
         }
         
         stage('Login to container registry') {
+                             
+                             echo "Login to Container registry"
             steps {
                 withCredentials([usernamePassword(credentialsId: 'acr_sp2', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
                             
                             sh 'az acr login --name $CONTAINER_REGISTRY --resource-group $RESOURCE_GROUP'
                            
                         }
+                              echo "Finish Login to Container registry"
             }
         }
         
         stage('Build Image') {
+                               echo "Start Image building"
             steps {
                 withCredentials([usernamePassword(credentialsId: 'acr_sp2', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
                             
@@ -40,9 +47,11 @@ pipeline {
                     
                         }
             }
+                               echo "Finish Image building"
         }
         
        stage('Container Deployment'){
+                              echo "Start kubernetes deployment"
              steps {
                            script{
                                 kubernetesDeploy(
@@ -52,6 +61,7 @@ pipeline {
                           )
                    }
               }
+                               echo "Finish kubernetes deployment"
        }
    
     }
